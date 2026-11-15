@@ -2,15 +2,14 @@ import json
 import time
 from datetime import date
 from json.decoder import JSONDecodeError
-from pathlib import Path
 
 import questionary
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 from yaspin import yaspin
 
 from ip_project.password import Password
+from ip_project.resource import resource_management
 from ip_project.visualization import data_visualization
 
 spinner = yaspin(color="green")
@@ -81,88 +80,6 @@ def register_disaster():
     with open(f"{DATA}/disaster_metadata.json", "w", encoding="utf-8") as f:
         json.dump(td, f)
 
-    questionary.press_any_key_to_continue().ask()
-
-
-def resource_ask():
-    return questionary.confirm(
-        "You want to add resource:", auto_enter=False, default=False
-    ).ask()
-
-
-class Resource:
-    def add_resource(self):
-        resources = {}
-        r_name = []
-        r_quant = []
-        number_resources = int(input("Enter number of resources you want to add: "))
-
-        for i in range(number_resources):
-            res_name = input(f"Enter Resource name numbered {i + 1}: ")
-            res_quant = int(input(f"Enter quantity of {res_name}: "))
-
-            r_name.append(res_name)
-            r_quant.append(res_quant)
-
-        resources["name"] = r_name
-        resources["quantity"] = r_quant
-
-        with open(f"{DATA}/resources.json", "w", encoding="utf-8") as f:
-            json.dump(resources, f)
-
-    def check_resource(self):
-        if Path(f"{DATA}/resources.json").exists():
-            try:
-                with open(f"{DATA}/resources.json", "r", encoding="utf-8") as f:
-                    self.resources = json.load(f)
-
-            except JSONDecodeError:
-                self.resources = []
-
-            if not isinstance(self.resources, dict) or self.resources is None:
-                self.resources = self.add_resource()
-
-        else:
-            self.resources = self.add_resource()
-
-    def show_resource(self):
-
-        with open(f"{DATA}/resources.json", "r", encoding="utf-8") as f:
-            resources = json.load(f)
-
-        table = Table(title="Available Resources")
-
-        table.add_column("Resource Name", justify="left", style="cyan")
-        table.add_column("Resource Quantity", justify="right", style="green")
-
-        name_row = resources["name"]
-        quant_row = resources["quantity"]
-
-        total_n = len(name_row)
-        total_q = len(quant_row)
-
-        if total_n == total_q:
-            for i in range(total_n):
-                name = name_row[i - 1]
-                quant = quant_row[i - 1]
-                table.add_row(name, str(quant))
-
-        console.print(table)
-
-
-def resource_management():
-    header(
-        title="Resource Management", sub_title="See all resources available or add any"
-    )
-
-    choice = resource_ask()
-
-    resources = Resource()
-    if choice:
-        resources.check_resource()
-
-    elif choice is False:
-        resources.show_resource()
     questionary.press_any_key_to_continue().ask()
 
 
