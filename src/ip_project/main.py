@@ -1,6 +1,5 @@
 import json
 import time
-from datetime import date
 from json.decoder import JSONDecodeError
 
 import questionary
@@ -8,6 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from yaspin import yaspin
 
+from ip_project.disaster import Disaster
 from ip_project.password import Password
 from ip_project.resource import resource_management
 from ip_project.visualization import data_visualization
@@ -29,61 +29,10 @@ def header(title: str | int, sub_title: str | int):
     )
 
 
-def register_disaster():
-    header(title="Register Disaster", sub_title="DRMS")
-
-    try:
-        with open(f"{DATA}/disaster_metadata.json", "r", encoding="utf-8") as f:
-            td = json.load(f)
-        if isinstance(td, dict):
-            td = [td]
-    except JSONDecodeError:
-        td = []
-
-    RD_CHOICES = ["Earthquake", "Flood", "WildFire", "Tsunami", "Drought", "Landslide"]
-    disaster_type = questionary.select("Register Disaster:", choices=RD_CHOICES).ask()
-
-    if disaster_type is None:
-        return
-
-    location = questionary.text(
-        "Enter affected location:", instruction="(e.g., Jaipur, Rajasthan)"
-    ).ask()
-
-    if location is None:
-        return
-
-    severity = questionary.select(
-        "Select severity:", choices=["Low", "Medium", "High", "Critical"]
-    ).ask()
-
-    if severity is None:
-        return
-
-    console.print(
-        Panel(
-            f"Type: {disaster_type}\nLocation: {location}\nSeverity: {severity}",
-            title="Disaster Registered",
-            border_style="green",
-        )
-    )
-
-    disaster = {
-        "date_registered": str(date.today()),
-        "disaster_type": disaster_type.lower(),
-        "location": location.lower(),
-        "severity": severity.lower(),
-    }
-
-    td.append(disaster)
-
-    with open(f"{DATA}/disaster_metadata.json", "w", encoding="utf-8") as f:
-        json.dump(td, f)
-
-    questionary.press_any_key_to_continue().ask()
-
-
 def DRMS() -> None:
+
+    disaster = Disaster()
+
     _password = Password()
     _password.header()
     if _password.check():
@@ -118,7 +67,7 @@ def DRMS() -> None:
             ).ask()
 
             if choice.lower() == "disaster registration":
-                register_disaster()
+                disaster.register()
 
             elif choice.lower() == "resource management":
                 resource_management()

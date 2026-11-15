@@ -1,6 +1,5 @@
 import json
 from json.decoder import JSONDecodeError
-from pathlib import Path
 
 import questionary
 from rich.console import Console
@@ -14,11 +13,11 @@ console = Console()
 
 
 class Resource:
-    def load_resource(self, file: str):
+    def _load_resource(self, file: str):
         try:
             with open(f"{DATA}/{file}.json", "r", encoding="utf-8") as f:
                 return json.load(f)
-        except FileNotFoundError, json.JSONDecodeError:
+        except FileNotFoundError, JSONDecodeError:
             return False
 
     def ask(self):
@@ -27,7 +26,7 @@ class Resource:
         ).ask()
 
     def add_resource(self):
-        resources = self.load_resource(file="resources")
+        resources = self._load_resource(file="resources")
 
         if isinstance(resources, dict):
             res_name = resources["name"]
@@ -68,23 +67,8 @@ class Resource:
         with open(f"{DATA}/resources.json", "w", encoding="utf-8") as f:
             json.dump(resources, f)
 
-    def check_resource(self):
-        if Path(f"{DATA}/resources.json").exists():
-            try:
-                with open(f"{DATA}/resources.json", "r", encoding="utf-8") as f:
-                    self.resources = json.load(f)
-
-            except JSONDecodeError:
-                self.resources = {}
-
-            if not isinstance(self.resources, dict) or self.resources is None:
-                self.resources = self.add_resource()
-
-        else:
-            self.resources = self.add_resource()
-
     def show_resource(self):
-        resources = self.load_resource(file="resources")
+        resources = self._load_resource(file="resources")
 
         if resources:
             table = Table(title="Available Resources")
