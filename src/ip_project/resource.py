@@ -46,7 +46,7 @@ class Resource:
                 res_quant.append(quant)
 
                 resources["name"] = res_name
-                resources["quant"] = res_quant
+                resources["quantity"] = res_quant
 
         elif not resources:
             resources = {}

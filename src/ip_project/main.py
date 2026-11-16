@@ -27,6 +27,7 @@ def header(title: str | int, sub_title: str | int):
             border_style="orange1",
         )
     )
+    # console.print(Panel(banner))
 
 
 def DRMS() -> None:

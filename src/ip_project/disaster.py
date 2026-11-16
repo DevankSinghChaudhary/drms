@@ -25,16 +25,15 @@ class Disaster:
 
     def _check_duplication(self, date: str, location: dict, d_type: str):
         disasters = self._load()
-
-        comp = {}
         comp2 = {
-            "disaster_type": d_type,
+            "disaster_type": d_type.lower(),
             "state": location["state"],
             "district": location["district"],
             "date": date,
         }
         if disasters:
             for disaster in disasters:
+                comp = {}
                 comp["disaster_type"] = disaster["disaster_type"]
                 comp["state"] = disaster["location"]["state"]
                 comp["district"] = disaster["location"]["district"]
