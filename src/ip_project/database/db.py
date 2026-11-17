@@ -7,7 +7,7 @@ from rich.table import Table
 console = Console()
 
 
-class DB:
+class DrmsDatabase:
     def _initialize_db(self) -> None:
         self.connection = sqlite3.connect("drms.db")
         self.cursor = self.connection.cursor()
@@ -34,15 +34,32 @@ class DB:
 
         self.connection.commit()
 
+    def total_disasters(self) -> int:
+        self._initialize_db()
+        connection = sqlite3.connect("drms.db")
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT * FROM disasters
+        """)
+
+        total = []
+
+        for row in cursor:
+            total.append(row["disaster_type"])
+
+        return len(total)
+
     def register_disaster(self, data: dict) -> None:
         self._initialize_db()
 
-        try:
-            date_registered = data["date_registered"]
-            disaster_type = data["disaster_type"]
-            location = data["location"]
-            severity = data["severity"]
+        date_registered = data["date_registered"]
+        disaster_type = data["disaster_type"]
+        location = data["location"]
+        severity = data["severity"]
 
+        try:
             self.cursor.execute(
                 """
                 INSERT INTO disasters
@@ -61,13 +78,17 @@ class DB:
                     border_style="green",
                 )
             )
-        except KeyError:
-            console.print("[red]Key Details for Disaster is Missing[/red]")
+        except sqlite3.IntegrityError:
+            print()
+            console.print(
+                f"[red]Already Registered {disaster_type} in {location} at {date_registered}[/red]"
+            )
 
     def update_disaster(self, data: dict) -> None:
         self._initialize_db()
 
         try:
+            id = data["id"]
             date_registered = data["date_registered"]
             disaster_type = data["disaster_type"]
             location = data["location"]
@@ -75,11 +96,10 @@ class DB:
 
             self.cursor.execute(
                 """
-                INSERT INTO disasters
-                    (date_registered, disaster_type, location, severity)
-                VALUES (?, ?, ?, ?)
+                UPDATE disasters SET date_registered = ?, disaster_type = ?, location = ?, severity = ?
+                WHERE disaster_id = ?
             """,
-                (date_registered, disaster_type, location, severity),
+                (date_registered, disaster_type, location, severity, id),
             )
 
             self.connection.commit()
@@ -87,10 +107,12 @@ class DB:
             console.print(
                 Panel(
                     f"[green]Date Registered: {date_registered}\nDisaster: {disaster_type}\nLocation: {location}\nSeverity: {severity}[/green]",
-                    title="Seccessfully Disaster Registered",
+                    title="Seccessfully Updated Disaster",
                     border_style="green",
                 )
             )
+            self._show_disaster()
+
         except KeyError:
             console.print("[red]Key Details for Disaster is Missing[/red]")
 
@@ -124,8 +146,6 @@ class DB:
             res_id = data["id"]
             res_name = data["name"]
             res_qaunt = data["quantity"]
-
-            # values = list(zip(res_name, res_qaunt))
 
             self.cursor.execute(
                 """
@@ -174,8 +194,38 @@ class DB:
         except sqlite3.OperationalError:
             console.print("[red]Add Resource First.[/red]")
 
+    def _show_disaster(self):
+        try:
+            connection = sqlite3.connect("drms.db")
+            connection.row_factory = sqlite3.Row
+            cursor = connection.cursor()
 
-db = DB()
-db.show_resource()
-db.update_resource(data={"id": 1, "name": "First Aid", "quantity": 999})
-db.show_resource()
+            cursor.execute("""
+                SELECT * FROM disasters
+            """)
+
+            table = Table(
+                title="Disasters Registered",
+                style="red",
+                caption="You can allocate resources to disasters",
+            )
+
+            table.add_column("ID", justify="center")
+            table.add_column("Date Registered")
+            table.add_column("Type")
+            table.add_column("Location", style="yellow")
+            table.add_column("Severity", style="red")
+
+            for row in cursor:
+                id = row["disaster_id"]
+                date = row["date_registered"]
+                disaster_type = row["disaster_type"]
+                location = row["location"]
+                severity = row["severity"]
+
+                table.add_row(str(id), date, disaster_type, location, severity)
+            print()
+            console.print(table)
+
+        except sqlite3.OperationalError:
+            console.print("[red]Add Disasters First[/red]")

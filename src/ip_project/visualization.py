@@ -8,16 +8,23 @@ console = Console()
 DATA = "./data"
 SEVERITIES = ["Low", "Medium", "High", "Critical"]
 
+errors = (FileNotFoundError, json.JSONDecodeError)
+
 
 class Visual:
     def load_disasters(self, file: str):
         try:
             with open(f"{DATA}/{file}.json", "r", encoding="utf-8") as f:
                 return json.load(f)
-        except FileNotFoundError, json.JSONDecodeError:
-            console.print(
-                f"[red]Cannot Visualize {file} as there is no /data/{file}.json[/red]"
-            )
+        except errors:
+            if errors == FileNotFoundError:
+                console.print(
+                    f"[red]Cannot Visualize {file} as there is no /data/{file}.json[/red]"
+                )
+            else:
+                console.print(
+                    f"[red]Cannot Visualize {file} as there is formatting issue in /data/{file}.json[/red]"
+                )
 
     def resource_visuals(self):
         data = self.load_disasters(file="resources")

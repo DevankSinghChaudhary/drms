@@ -1,61 +1,21 @@
-import json
 from datetime import date
-from json.decoder import JSONDecodeError
 
 import questionary
-from rich.console import Console
-from rich.panel import Panel
 
+from ip_project.database import DrmsDatabase
 from ip_project.geo_normal import GeoData
 from ip_project.header import header
 
-DATA = "./data"
 
+class DisasterManager:
+    def __init__(self) -> None:
+        self.DrmsDatabase = DrmsDatabase()
 
-console = Console()
+    def total_disasters(self) -> int:
+        return self.DrmsDatabase.total_disasters()
 
-
-class Disaster:
-    def _load(self):
-        try:
-            with open(f"{DATA}/disaster_metadata.json", "r", encoding="utf-8") as f:
-                return json.load(f)
-        except FileNotFoundError, JSONDecodeError:
-            return False
-
-    def _check_duplication(self, date: str, location: dict, d_type: str):
-        disasters = self._load()
-        comp2 = {
-            "disaster_type": d_type.lower(),
-            "state": location["state"],
-            "district": location["district"],
-            "date": date,
-        }
-        if disasters:
-            for disaster in disasters:
-                comp = {}
-                comp["disaster_type"] = disaster["disaster_type"]
-                comp["state"] = disaster["location"]["state"]
-                comp["district"] = disaster["location"]["district"]
-                comp["date"] = disaster["date_registered"]
-
-                if comp == comp2:
-                    return False
-                else:
-                    return True
-        else:
-            return True
-
-    def register(self):
+    def register(self) -> None:
         header(title="Register Disaster", sub_title="DRMS")
-
-        try:
-            with open(f"{DATA}/disaster_metadata.json", "r", encoding="utf-8") as f:
-                td = json.load(f)
-            if isinstance(td, dict):
-                td = [td]
-        except FileNotFoundError, JSONDecodeError:
-            td = []
 
         RD_CHOICES = [
             "Earthquake",
@@ -85,32 +45,24 @@ class Disaster:
         if severity is None:
             return
 
-        confirmation = self._check_duplication(
-            date=str(date.today()), location=location, d_type=disaster_type
-        )
-        if confirmation:
-            disaster = {
-                "date_registered": str(date.today()),
-                "disaster_type": disaster_type.lower(),
-                "location": location,
-                "severity": severity.lower(),
-            }
+        data = {
+            "date_registered": str(date.today()),
+            "disaster_type": disaster_type,
+            "location": location["location"],
+            "severity": severity,
+        }
 
-            td.append(disaster)
-            console.print(
-                Panel(
-                    f"Type: {disaster_type}\nState: {location['state']}\nDistrict: {location['district']}\nSeverity: {severity}",
-                    title="Disaster Registered",
-                    border_style="green",
-                )
-            )
-            with open(f"{DATA}/disaster_metadata.json", "w", encoding="utf-8") as f:
-                json.dump(td, f)
+        self.DrmsDatabase.register_disaster(data=data)
+        questionary.press_any_key_to_continue().ask()
 
-        else:
-            console.print(
-                Panel(
-                    f"[yellow]Already Registered this Disaster: {disaster_type} in {location['district']}, {location['state']} at {date.today()}[/yellow]"
-                )
-            )
+    def update_disaster(self, updated_data: dict) -> None:
+        header(title="Update Disasters", sub_title="DRMS")
+
+        self.DrmsDatabase.update_disaster(data=updated_data)
+        questionary.press_any_key_to_continue().ask()
+
+    def show_disasters(self):
+        header(title="Disasters", sub_title="DRMS")
+
+        self.DrmsDatabase._show_disaster()
         questionary.press_any_key_to_continue().ask()

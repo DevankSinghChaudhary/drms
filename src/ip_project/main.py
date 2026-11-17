@@ -1,18 +1,20 @@
-import json
+import sqlite3
 import time
-from json.decoder import JSONDecodeError
 
 import questionary
 from rich.console import Console
 from rich.panel import Panel
 from yaspin import yaspin
 
-from ip_project.disaster import Disaster
+from ip_project.disaster import DisasterManager
 from ip_project.password import Password
 from ip_project.resource import resource_management
 from ip_project.visualization import data_visualization
 
 spinner = yaspin(color="green")
+
+connection = sqlite3.connect("drms.db")
+cursor = connection.cursor()
 
 console = Console()
 
@@ -27,12 +29,11 @@ def header(title: str | int, sub_title: str | int):
             border_style="orange1",
         )
     )
-    # console.print(Panel(banner))
 
 
 def DRMS() -> None:
 
-    disaster = Disaster()
+    disaster = DisasterManager()
 
     _password = Password()
     _password.header()
@@ -42,16 +43,10 @@ def DRMS() -> None:
                 title="Disaster Resource Management System",
                 sub_title="DRMS",
             )
-            try:
-                with open(f"{DATA}/disaster_metadata.json", "r", encoding="utf-8") as f:
-                    total_disasters = json.load(f)
-
-            except FileNotFoundError, JSONDecodeError:
-                total_disasters = []
 
             console.print(
                 Panel(
-                    f"Toal Disasters Recorded: {len(total_disasters)}",
+                    f"Toal Disasters Recorded: {disaster.total_disasters()}",
                     border_style="red",
                 )
             )

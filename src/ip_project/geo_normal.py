@@ -61,4 +61,4 @@ class GeoData:
             f"Select city in {selected_state}:", choices=districts_name, style=style
         ).ask()
 
-        return {"state": selected_state, "district": selected_district}
+        return {"location": f"{selected_district}, {selected_state}"}
