@@ -1,4 +1,3 @@
-import sqlite3
 import time
 
 import questionary
@@ -13,12 +12,7 @@ from ip_project.visualization import data_visualization
 
 spinner = yaspin(color="green")
 
-connection = sqlite3.connect("drms.db")
-cursor = connection.cursor()
-
 console = Console()
-
-DATA = "./data"
 
 
 def header(title: str | int, sub_title: str | int):

@@ -11,3 +11,8 @@ wheels/
 
 
 *.db
+*.csv
+
+text.py
+tezt.py
+test.py
