@@ -61,7 +61,7 @@ class Csv:
                         border_style="green",
                     )
                 )
-        elif duplication is None or False:
+        else:
             console.print(
                 Panel(
                     f"[white]Date Registered: {disaster['date_registered']}\nDisaster: {disaster['disaster_type']}\nLocation: {disaster['location']}\nSeverity: {disaster['severity']}[/white]",
