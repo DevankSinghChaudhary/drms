@@ -1,3 +1,3 @@
-from .operations import ResourceCsv
+from .operations import resource_management
 
-__all__ = ["ResourceCsv"]
+__all__ = ["resource_management"]

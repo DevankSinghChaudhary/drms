@@ -4,7 +4,7 @@ import questionary
 from rich.console import Console
 
 from ip_project.database import DisasterCsv
-from ip_project.geo_normal import GeoData
+from ip_project.geo import GeoData
 from ip_project.header import header
 
 console = Console()

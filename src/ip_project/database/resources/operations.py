@@ -1,96 +1,106 @@
 import pandas as pd
+import questionary
 from rich.console import Console
-from rich.panel import Panel
 from rich.table import Table
 
-RESOURCES = "./resources.csv"
+from ip_project.header import header
+
+RESOURCE = "./resource.csv"
 
 console = Console()
 
 
 class ResourceCsv:
-    def _read(self) -> dict | None:
+    def _load_resource(self, file: str):
         try:
-            data = pd.read_csv(RESOURCES, index_col=None)
+            data = pd.read_csv(file, index_col=None)
             return data.to_dict(orient="list")
 
         except FileNotFoundError:
             return None
 
-    def _check_duplication(self, resource: dict):
-        already_registered = self._read()
+    def ask(self):
+        return questionary.confirm(
+            "You want to add resource:", auto_enter=False, default=False
+        ).ask()
 
-        if already_registered:
-            for names in already_registered["names"]:
-                if names not in resource["names"]:
-                    return True
-        else:
-            return True
+    def add_resource(self):
+        resources = self._load_resource(file=RESOURCE)
 
-    def register_disaster(self, resource: dict) -> None:
-        reg_resource = self._read()
-        duplication = self._check_duplication(resource=resource)
+        if isinstance(resources, dict):
+            res_name = resources["name"]
+            res_quant = resources["quantity"]
 
-        if duplication:
-            if isinstance(reg_resource, dict):
-                resource_df = pd.DataFrame(resource)
-                resource_df.to_csv(RESOURCES)
-                console.print(
-                    Panel(
-                        f"[green]Resources: {resource['names']}\nQuantity: {resource['quants']}[/green]",
-                        title="Resources Successfully Registered",
-                        border_style="green",
-                    )
-                )
-        else:
-            console.print("[yellow]Already Registered[/yellow]")
+            total_data = len(res_name)
+            number_resources = int(
+                input("Enter number of resource you want to append: ")
+            )
 
-    def show_resource(self) -> None:
-        resource = self._read()
+            for i in range(number_resources):
+                i = i + 1
+                name = input(f"Enter Resource name numbered {total_data + i}: ")
+                quant = int(input(f"Enter quantity of {name}: "))
 
-        table = Table(
-            title="Registered Resources",
-            border_style="yellow",
-        )
+                res_name.append(name)
+                res_quant.append(quant)
 
-        table.add_column("ID")
-        table.add_column("Resource Name")
-        table.add_column("Quantity")
+                resources["name"] = res_name
+                resources["quantity"] = res_quant
 
-        if resource:
-            id = resource["ID"]
-            names = resource["names"]
-            quants = resource["quants"]
+        elif not resources:
+            resources = {}
+            r_name = []
+            r_quant = []
+            number_resources = int(input("Enter number of resources you want to add: "))
 
-            values = list(zip(id, names, quants))
+            for i in range(number_resources):
+                res_name = input(f"Enter Resource name numbered {i + 1}: ")
+                res_quant = int(input(f"Enter quantity of {res_name}: "))
 
-            for value in values:
-                table.add_row(value)
+                r_name.append(res_name)
+                r_quant.append(res_quant)
+
+            resources["name"] = r_name
+            resources["quantity"] = r_quant
+
+        resource_df = pd.DataFrame(resources)
+        resource_df.to_csv(RESOURCE, index=False)
+
+    def show_resource(self):
+        resources = self._load_resource(file=RESOURCE)
+
+        if resources:
+            table = Table(title="Available Resources")
+
+            table.add_column("Resource Name", justify="left", style="cyan")
+            table.add_column("Resource Quantity", justify="right", style="green")
+
+            name_row = resources["name"]
+            quant_row = resources["quantity"]
+
+            total_n = len(name_row)
+            total_q = len(quant_row)
+
+            if total_n == total_q:
+                for i in range(total_n):
+                    name = name_row[i - 1]
+                    quant = quant_row[i - 1]
+                    table.add_row(name, str(quant))
 
             console.print(table)
+
         else:
-            console.print("[red]Register Resource First to Show[/red]")
+            console.print("[red]No Resource file found[/red]")
 
-    def delete_disaster(self, id: int) -> None:
-        register_disaster = self._read()
 
-        new = []
-        _id = 1
+def resource_management():
+    header(
+        title="Resource Management", sub_title="See all resources available or add any"
+    )
 
-        if register_disaster:
-            for rd in register_disaster:
-                if rd["ID"] == int(id):
-                    console.print(
-                        Panel(
-                            f"ID: {rd['ID']}\nDate: {rd['date_registered']}\nDisaster: {rd['disaster_type']}\nLocation: {rd['location']}\nSeverity: {rd['severity']}",
-                            title="Disaster Deleted",
-                            border_style="yellow",
-                        )
-                    )
-                    del rd
-                else:
-                    rd["ID"] = _id
-                    _id += 1
-                    new.append(rd)
-            disaster_df = pd.DataFrame(new)
-            disaster_df.to_csv(DISASTERS, index=False)
+    resources = ResourceCsv()
+    resources.show_resource()
+    choice = resources.ask()
+
+    if choice:
+        resources.add_resource()

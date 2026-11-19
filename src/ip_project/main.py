@@ -5,10 +5,10 @@ from rich.console import Console
 from rich.panel import Panel
 from yaspin import yaspin
 
+from ip_project.database import resource_management
 from ip_project.disaster import DisasterManager
 from ip_project.password import Password
-from ip_project.resource import resource_management
-from ip_project.visualization import data_visualization
+from ip_project.visuals import data_visualization
 
 spinner = yaspin(color="green")
 
