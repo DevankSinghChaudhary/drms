@@ -1,18 +1,21 @@
 from datetime import date
 
 import questionary
+from rich.console import Console
 
-from ip_project.database import DrmsDatabase
+from ip_project.database import DisasterCsv
 from ip_project.geo_normal import GeoData
 from ip_project.header import header
+
+console = Console()
 
 
 class DisasterManager:
     def __init__(self) -> None:
-        self.DrmsDatabase = DrmsDatabase()
+        self.DisasterCsv = DisasterCsv()
 
-    def total_disasters(self) -> int:
-        return self.DrmsDatabase.total_disasters()
+    def total_disasters(self) -> int | None:
+        return self.DisasterCsv.total_records()
 
     def register(self) -> None:
         header(title="Register Disaster", sub_title="DRMS")
@@ -52,17 +55,92 @@ class DisasterManager:
             "severity": severity,
         }
 
-        self.DrmsDatabase.register_disaster(data=data)
+        self.DisasterCsv.register_disaster(disaster=data)
         questionary.press_any_key_to_continue().ask()
 
-    def update_disaster(self, updated_data: dict) -> None:
+    def update_disaster(self) -> None:
         header(title="Update Disasters", sub_title="DRMS")
+        total_records = self.DisasterCsv.total_records()
+        if total_records:
+            ID = []
+            for i in range(total_records + 1):
+                if i == 0:
+                    pass
+                else:
+                    ID.append(str(i))
+            print()
+            self.show_disasters()
+            selected_id = questionary.select("Select ID to Update:", choices=ID).ask()
+            fields = questionary.checkbox(
+                f"Select What to update in {selected_id} (Date Registered will be auto-updated):",
+                choices=["Disaster Type", "Location", "Severity"],
+            ).ask()
 
-        self.DrmsDatabase.update_disaster(data=updated_data)
+            data = {}
+            if "Disaster Type" in fields:
+                RD_CHOICES = [
+                    "Earthquake",
+                    "Flood",
+                    "WildFire",
+                    "Tsunami",
+                    "Drought",
+                    "Landslide",
+                ]
+                disaster_type = questionary.select(
+                    "Register Disaster:", choices=RD_CHOICES
+                ).ask()
+
+                if disaster_type is None:
+                    return
+                data["disaster_type"] = disaster_type
+
+            if "Location" in fields:
+                geo = GeoData()
+                location = geo.ask()
+
+                if location is None:
+                    return
+                data["location"] = location["location"]
+
+            if "Severity" in fields:
+                severity = questionary.select(
+                    "Select severity:", choices=["Low", "Medium", "High", "Critical"]
+                ).ask()
+
+                if severity is None:
+                    return
+                data["severity"] = severity
+
+            data["date_registered"] = str(date.today())
+
+            self.DisasterCsv.update_disaster(id=selected_id, data=data)
+        else:
+            console.print("[red]No disaster to update[/red]")
         questionary.press_any_key_to_continue().ask()
 
     def show_disasters(self):
         header(title="Disasters", sub_title="DRMS")
 
-        self.DrmsDatabase._show_disaster()
+        self.DisasterCsv.show_disaster()
         questionary.press_any_key_to_continue().ask()
+
+    def delete_disaster(self):
+        total_records = self.total_disasters()
+        if total_records:
+            ID = []
+            for i in range(total_records + 1):
+                if i == 0:
+                    pass
+                else:
+                    ID.append(str(i))
+            print()
+            self.show_disasters()
+            _id = questionary.select(
+                "Which disaster record to delete:", choices=ID
+            ).ask()
+
+            self.DisasterCsv.delete_disaster(id=_id)
+        else:
+            console.print("[red]Register to delete[/red]")
+        print()
+        self.show_disasters()

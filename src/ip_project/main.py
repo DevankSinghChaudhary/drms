@@ -47,6 +47,8 @@ def DRMS() -> None:
 
             CHOICES = [
                 "Disaster Registration",
+                "Update Disaster",
+                "Delete Disaster",
                 "Resource Management",
                 "Data Visualization",
                 "EXIT",
@@ -58,6 +60,12 @@ def DRMS() -> None:
 
             if choice.lower() == "disaster registration":
                 disaster.register()
+
+            elif choice.lower() == "update disaster":
+                disaster.update_disaster()
+
+            elif choice.lower() == "delete disaster":
+                disaster.delete_disaster()
 
             elif choice.lower() == "resource management":
                 resource_management()

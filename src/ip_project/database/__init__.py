@@ -1,3 +1,3 @@
-from .db import DrmsDatabase
+from .disasters import DisasterCsv
 
-__all__ = ["DrmsDatabase"]
+__all__ = ["DisasterCsv"]

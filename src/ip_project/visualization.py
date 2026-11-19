@@ -1,37 +1,33 @@
-import json
-
 import matplotlib.pyplot as graph
+import pandas as pd
 import questionary
 from rich.console import Console
 
 console = Console()
-DATA = "./data"
+DISASTER = "./disaster_metadate.csv"
+RESOURCE = "./resource.csv"
 SEVERITIES = ["Low", "Medium", "High", "Critical"]
-
-errors = (FileNotFoundError, json.JSONDecodeError)
 
 
 class Visual:
-    def load_disasters(self, file: str):
+    def _read(self, file: str):
         try:
-            with open(f"{DATA}/{file}.json", "r", encoding="utf-8") as f:
-                return json.load(f)
-        except errors:
-            if errors == FileNotFoundError:
-                console.print(
-                    f"[red]Cannot Visualize {file} as there is no /data/{file}.json[/red]"
-                )
+            if file == DISASTER:
+                data = pd.read_csv(file, index_col=None)
+                return data.to_dict(orient="records")
             else:
-                console.print(
-                    f"[red]Cannot Visualize {file} as there is formatting issue in /data/{file}.json[/red]"
-                )
+                data = pd.read_csv(file, index_col=None)
+                return data.to_dict(orient="list")
+
+        except FileNotFoundError:
+            return False
 
     def resource_visuals(self):
-        data = self.load_disasters(file="resources")
+        _data = self._read(file=RESOURCE)
 
-        if data:
-            names = data["name"]
-            quants = data["quantity"]
+        if _data:
+            names = _data["name"]
+            quants = _data["quantity"]
 
             graph.bar(names, quants, color="skyblue")
             graph.xlabel("Available Resources")
@@ -40,7 +36,7 @@ class Visual:
             graph.show()
 
     def severity_visuals(self):
-        data = self.load_disasters(file="disaster_metadata")
+        data = self._read(file=DISASTER)
 
         low = []
         med = []

@@ -25,7 +25,7 @@ class GeoData:
                 else:
                     raise TimeoutError(f"Cannot access {BASE_URL}")
 
-    def ask(self, disaster: str) -> dict:
+    def ask(self, disaster=None) -> dict:
         states = self.get_data(endpoint="/api/states", params={"limit": 100})
 
         state_names = []
@@ -41,9 +41,16 @@ class GeoData:
             ]
         )
 
-        selected_state = questionary.autocomplete(
-            f"Select state where {disaster} happened:", choices=state_names, style=style
-        ).ask()
+        if disaster:
+            selected_state = questionary.autocomplete(
+                f"Select state where {disaster} happened:",
+                choices=state_names,
+                style=style,
+            ).ask()
+        else:
+            selected_state = questionary.autocomplete(
+                "Select state where happened:", choices=state_names, style=style
+            ).ask()
 
         for state in states["data"]:
             if selected_state == state["name"]:

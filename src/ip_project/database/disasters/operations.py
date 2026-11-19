@@ -13,6 +13,7 @@ class DisasterCsv:
         try:
             data = pd.read_csv(DISASTERS, index_col=None)
             return data.to_dict(orient="records")
+
         except FileNotFoundError:
             return False
 
@@ -33,7 +34,7 @@ class DisasterCsv:
         else:
             return True
 
-    def register_disaster(self, disaster: dict):
+    def register_disaster(self, disaster: dict) -> None:
         reg_disaster = self._read()
         duplication = self._check_duplication(disaster=disaster)
 
@@ -78,7 +79,7 @@ class DisasterCsv:
                 )
             )
 
-    def show_disaster(self):
+    def show_disaster(self) -> None:
         disasters = self._read()
 
         table = Table(
@@ -107,7 +108,7 @@ class DisasterCsv:
         else:
             console.print("[red]Register disaster to show.[/red]")
 
-    def delete_disaster(self, id: int):
+    def delete_disaster(self, id: int) -> None:
         register_disaster = self._read()
 
         new = []
@@ -115,7 +116,7 @@ class DisasterCsv:
 
         if register_disaster:
             for rd in register_disaster:
-                if rd["ID"] == id:
+                if rd["ID"] == int(id):
                     console.print(
                         Panel(
                             f"ID: {rd['ID']}\nDate: {rd['date_registered']}\nDisaster: {rd['disaster_type']}\nLocation: {rd['location']}\nSeverity: {rd['severity']}",
@@ -130,3 +131,25 @@ class DisasterCsv:
                     new.append(rd)
             disaster_df = pd.DataFrame(new)
             disaster_df.to_csv(DISASTERS, index=False)
+
+    def total_records(self) -> int | None:
+        data = self._read()
+        if data:
+            return len(data)
+        else:
+            return None
+
+    def update_disaster(self, id: int, data: dict) -> None:
+        register_disasters = self._read()
+
+        if register_disasters:
+            for rd in register_disasters:
+                if rd.get("ID") == int(id):
+                    rd.update(data)
+                    break
+
+            disaster_df = pd.DataFrame(register_disasters)
+            disaster_df.to_csv(DISASTERS, index=False)
+
+        else:
+            console.print("[red]Cannot update non-existing record[/red]")

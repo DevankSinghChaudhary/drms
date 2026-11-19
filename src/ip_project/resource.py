@@ -1,13 +1,11 @@
-import json
-from json.decoder import JSONDecodeError
-
+import pandas as pd
 import questionary
 from rich.console import Console
 from rich.table import Table
 
 from ip_project.header import header
 
-DATA = "./data"
+RESOURCE = "./resource.csv"
 
 console = Console()
 
@@ -15,10 +13,11 @@ console = Console()
 class Resource:
     def _load_resource(self, file: str):
         try:
-            with open(f"{DATA}/{file}.json", "r", encoding="utf-8") as f:
-                return json.load(f)
-        except FileNotFoundError, JSONDecodeError:
-            return False
+            data = pd.read_csv(file, index_col=None)
+            return data.to_dict(orient="list")
+
+        except FileNotFoundError:
+            return None
 
     def ask(self):
         return questionary.confirm(
@@ -26,7 +25,7 @@ class Resource:
         ).ask()
 
     def add_resource(self):
-        resources = self._load_resource(file="resources")
+        resources = self._load_resource(file=RESOURCE)
 
         if isinstance(resources, dict):
             res_name = resources["name"]
@@ -64,11 +63,11 @@ class Resource:
             resources["name"] = r_name
             resources["quantity"] = r_quant
 
-        with open(f"{DATA}/resources.json", "w", encoding="utf-8") as f:
-            json.dump(resources, f)
+        resource_df = pd.DataFrame(resources)
+        resource_df.to_csv(RESOURCE, index=False)
 
     def show_resource(self):
-        resources = self._load_resource(file="resources")
+        resources = self._load_resource(file=RESOURCE)
 
         if resources:
             table = Table(title="Available Resources")
