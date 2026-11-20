@@ -14,8 +14,8 @@
 
 1. Clone the repository
 ```bash
-git clone https://github.com/DevankSinghChaudhary/school_project.git
-cd school_project
+git clone https://github.com/DevankSinghChaudhary/drms.git
+cd drms
 ```
 
 2. Install uv
@@ -37,11 +37,11 @@ uv run main.py
 
 ## Project Structure
 ```bash
-school_project/
+drms/
 ├── pyproject.toml
 ├── uv.lock
 ├── README.md
 └── src/
-    └── school_project/
+    └── ip_project/
         └── ...
 ```
