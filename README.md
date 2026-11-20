@@ -4,18 +4,17 @@
 ## Prerequisites
 
 - Git
-- Python 3.14
+- Python >=3.14
 - uv (Setup below)
 
 > [!NOTE]
 > To install git on windows or any OS refer [here](https://git-scm.com/install/windows)
 
 ## SETUP
-(uv is python package and project manager)
 
 1. Clone the repository
 ```bash
-git clone https://www.github.com/devanksinghchaudhary/school_project.git
+git clone https://github.com/DevankSinghChaudhary/school_project.git
 cd school_project
 ```
 

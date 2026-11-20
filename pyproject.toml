@@ -1,7 +1,7 @@
 [project]
-name = "ip-project"
+name = "DRMS"
 version = "0.1.0"
-description = "Add your description here"
+description = "Disaster Resource Management System"
 readme = "README.md"
 authors = [
     { name = "devanksinghchaudhary", email = "devanksinghchaudhary@gmail.com" }
