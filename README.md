@@ -7,6 +7,9 @@
 - Python 3.14
 - uv (Setup below)
 
+> [!NOTE]
+> To install git on windows or any OS refer [here](https://git-scm.com/install/windows)
+
 ## SETUP
 (uv is python package and project manager)
 
