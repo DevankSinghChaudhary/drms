@@ -122,7 +122,6 @@ class DisasterManager:
         header(title="Disasters", sub_title="DRMS")
 
         self.DisasterCsv.show_disaster()
-        questionary.press_any_key_to_continue().ask()
 
     def delete_disaster(self):
         total_records = self.total_disasters()
@@ -142,5 +141,27 @@ class DisasterManager:
             self.DisasterCsv.delete_disaster(id=_id)
         else:
             console.print("[red]Register to delete[/red]")
-        print()
-        self.show_disasters()
+
+
+def disaster():
+    disaster = DisasterManager()
+
+    CHOICES = ["Register Disaster", "Update Disaster", "Delete Disaster"]
+
+    disaster.show_disasters()
+    print()
+    console.print("[cyan]Showing so you can take better decision.[/cyan]")
+
+    choice = questionary.select(
+        "Operations you can do in Disaster:",
+        choices=CHOICES,
+    ).ask()
+
+    if choice == CHOICES[0]:
+        disaster.register()
+
+    elif choice == CHOICES[1]:
+        disaster.update_disaster()
+
+    elif choice == CHOICES[2]:
+        disaster.delete_disaster()

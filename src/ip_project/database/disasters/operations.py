@@ -14,7 +14,7 @@ class DisasterCsv:
             data = pd.read_csv(DISASTERS, index_col=None)
             return data.to_dict(orient="records")
 
-        except FileNotFoundError:
+        except FileNotFoundError, pd.pandas.errors.EmptyDataError:
             return False
 
     def _check_duplication(self, disaster: dict):

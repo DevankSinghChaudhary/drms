@@ -1,5 +1,5 @@
 [project]
-name = "DRMS"
+name = "ip_project"
 version = "0.1.0"
 description = "Disaster Resource Management System"
 readme = "README.md"

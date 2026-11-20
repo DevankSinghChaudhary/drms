@@ -6,7 +6,7 @@ from rich.panel import Panel
 from yaspin import yaspin
 
 from ip_project.database import resource_management
-from ip_project.disaster import DisasterManager
+from ip_project.disaster import DisasterManager, disaster
 from ip_project.password import Password
 from ip_project.visuals import data_visualization
 
@@ -26,8 +26,7 @@ def header(title: str | int, sub_title: str | int):
 
 
 def DRMS() -> None:
-
-    disaster = DisasterManager()
+    _disaster = DisasterManager()
 
     _password = Password()
     _password.header()
@@ -40,15 +39,13 @@ def DRMS() -> None:
 
             console.print(
                 Panel(
-                    f"Toal Disasters Recorded: {disaster.total_disasters()}",
+                    f"Toal Disasters Recorded: {_disaster.total_disasters()}",
                     border_style="red",
                 )
             )
 
             CHOICES = [
                 "Disaster Registration",
-                "Update Disaster",
-                "Delete Disaster",
                 "Resource Management",
                 "Data Visualization",
                 "EXIT",
@@ -59,13 +56,7 @@ def DRMS() -> None:
             ).ask()
 
             if choice.lower() == "disaster registration":
-                disaster.register()
-
-            elif choice.lower() == "update disaster":
-                disaster.update_disaster()
-
-            elif choice.lower() == "delete disaster":
-                disaster.delete_disaster()
+                disaster()
 
             elif choice.lower() == "resource management":
                 resource_management()

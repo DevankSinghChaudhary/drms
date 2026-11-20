@@ -4,7 +4,7 @@ import questionary
 from rich.console import Console
 from yaspin import yaspin
 
-from .header import header
+from ip_project.header import header
 
 console = Console()
 PASSWORD = "FISH"
