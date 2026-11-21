@@ -1,6 +1,7 @@
 import pandas as pd
 
 DISASTER = "./disasters_metadata.csv"
+RESOUECE = "./resources.csv"
 PASSWORD = "ADK"
 
 
@@ -20,7 +21,6 @@ class Password:
 
     def ask_password(self) -> str:
         while True:
-            self._tries = 5
             _password = input("Enter Password: ")
             if not _password:
                 print("Password Cannot be empty!")
@@ -98,7 +98,7 @@ class Disaster:
 
                 print(
                     f"{'+' * 60}"
-                    f"Date Registered: {disaster['date_registered']}\n"
+                    f"\nDate Registered: {disaster['date_registered']}\n"
                     f"Disaster: {disaster['disaster_type']}\n"
                     f"Location: {disaster['location']}\n"
                     f"Severity: {disaster['severity']}\n"
@@ -112,7 +112,7 @@ class Disaster:
 
                 print(
                     f"{'+' * 60}"
-                    f"Date Registered: {disaster['date_registered']}\n"
+                    f"\nDate Registered: {disaster['date_registered']}\n"
                     f"Disaster: {disaster['disaster_type']}\n"
                     f"Location: {disaster['location']}\n"
                     f"Severity: {disaster['severity']}\n"
@@ -128,3 +128,56 @@ class Disaster:
                 f"Severity: {disaster['severity']}\n"
                 f"{'+' * 60}",
             )
+
+    def update_disaster(self, id: str, data: dict) -> None:
+        register_disasters = self._read()
+
+        if register_disasters:
+            for rd in register_disasters:
+                if str(rd.get("ID")).strip() == str(id).strip():
+                    rd.update(data)
+                    break
+
+            disaster_df = pd.DataFrame(register_disasters)
+            disaster_df.to_csv(DISASTER, index=False)
+
+        else:
+            print("Cannot update non-existing record")
+
+    def delete_disaster(self, id: str) -> None:
+        register_disaster = self._read()
+
+        new = []
+        _id = 1
+
+        if register_disaster:
+            for rd in register_disaster:
+                if str(rd.get("ID")).strip() == str(id).strip():
+                    print(
+                        f"{'+' * 60}"
+                        f"\nID: {rd['ID']}\n"
+                        f"Date: {rd['date_registered']}\n"
+                        f"Disaster: {rd['disaster_type']}\n"
+                        f"Location: {rd['location']}\n"
+                        f"Severity: {rd['severity']}\n"
+                        f"{'+' * 60}"
+                    )
+                    del rd
+                else:
+                    rd["ID"] = _id
+                    _id += 1
+                    new.append(rd)
+            disaster_df = pd.DataFrame(new)
+            disaster_df.to_csv(DISASTER, index=False)
+
+    def total_records(self) -> int | None:
+        data = self._read()
+        if data:
+            return len(data)
+        else:
+            return None
+
+
+class Resource:
+    def _read(self):
+        pass
