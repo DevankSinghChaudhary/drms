@@ -59,7 +59,7 @@ class Disaster:
         try:
             data = pd.read_csv(DISASTER, index_col=False)
             return data.to_dict(orient="records")
-        except pd.pandas.errors.EmptyDataError:
+        except FileNotFoundError, pd.pandas.errors.EmptyDataError:
             return None
 
     def _check_duplication(self, disaster: dict):
@@ -68,6 +68,7 @@ class Disaster:
         new = []
         if already_registered:
             disaster_copy = disaster.copy()
+            del disaster_copy["ID"]
             del disaster_copy["severity"]
             for ar in already_registered:
                 del ar["ID"]
@@ -96,10 +97,12 @@ class Disaster:
                 disasters.to_csv(DISASTER, index=False)
 
                 print(
+                    f"{'+' * 60}"
                     f"Date Registered: {disaster['date_registered']}\n"
                     f"Disaster: {disaster['disaster_type']}\n"
                     f"Location: {disaster['location']}\n"
-                    f"Severity: {disaster['severity']}"
+                    f"Severity: {disaster['severity']}\n"
+                    f"{'+' * 60}"
                 )
 
             else:
@@ -108,16 +111,20 @@ class Disaster:
                 disaster_df.to_csv(DISASTER, index=False)
 
                 print(
+                    f"{'+' * 60}"
                     f"Date Registered: {disaster['date_registered']}\n"
                     f"Disaster: {disaster['disaster_type']}\n"
                     f"Location: {disaster['location']}\n"
-                    f"Severity: {disaster['severity']}"
+                    f"Severity: {disaster['severity']}\n"
+                    f"{'+' * 60}"
                 )
         else:
             print(
-                f"Already Registered"
+                f"{'+' * 60}"
+                f"\nALREADY REGISTERED\n\n"
                 f"Date Registered: {disaster['date_registered']}\n"
                 f"Disaster: {disaster['disaster_type']}\n"
                 f"Location: {disaster['location']}\n"
-                f"Severity: {disaster['severity']}"
+                f"Severity: {disaster['severity']}\n"
+                f"{'+' * 60}",
             )
