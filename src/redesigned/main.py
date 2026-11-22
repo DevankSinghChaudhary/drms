@@ -21,7 +21,9 @@ def header(title: str, sub_title: str) -> None:
 
 def ask_loop(prompt: str, func=str):
     while True:
+        print("-" * 40)
         answer = func(input(prompt))
+        print("-" * 40)
         if answer == "":
             print("Input cannot be empty!")
             print()
@@ -64,6 +66,16 @@ class Password:
 
 
 class Disaster:
+    def _show(self):
+        try:
+            print(
+                pd.read_csv(DISASTER).to_string(
+                    index=False, max_colwidth=20, justify="left"
+                )
+            )
+        except FileNotFoundError, pd.pandas.errors.EmptyDataError:
+            print("Cannot access Disaster CSV")
+
     def _read(self) -> list | None:
         try:
             data = pd.read_csv(DISASTER, index_col=False)
@@ -129,7 +141,8 @@ class Disaster:
                 print()
                 print(
                     f"{'+' * 60}"
-                    f"\nDate Registered: {disaster['date_registered']}\n"
+                    f"\nREGISTERED\n\n"
+                    f"Date Registered: {disaster['date_registered']}\n"
                     f"Disaster: {disaster['disaster_type']}\n"
                     f"Location: {disaster['location']}\n"
                     f"Severity: {disaster['severity']}\n"
@@ -145,7 +158,8 @@ class Disaster:
                 print()
                 print(
                     f"{'+' * 60}"
-                    f"\nDate Registered: {disaster['date_registered']}\n"
+                    f"\nREGISTERED\n\n"
+                    f"Date Registered: {disaster['date_registered']}\n"
                     f"Disaster: {disaster['disaster_type']}\n"
                     f"Location: {disaster['location']}\n"
                     f"Severity: {disaster['severity']}\n"
@@ -168,9 +182,26 @@ class Disaster:
     def update_disaster(self) -> None:
         register_disasters = self._read()
 
+        self._show()
+        print()
+        selected_id = ask_loop("Enter which ID to update: ")
+        print()
+        print("Date will be auto-updated")
+        print()
+
         if register_disasters:
             for rd in register_disasters:
-                if str(rd.get("ID")).strip() == str(id).strip():
+                if str(rd.get("ID")).strip() == str(selected_id).strip():
+                    dtype = ask_loop(f"Disaster Type: {rd['disaster_type']} => ")
+                    location = ask_loop(f"Location: {rd['location']} => ")
+                    severity = ask_loop(f"Severity: {rd['severity']} => ")
+                    data = {
+                        "date_registered": str(date.today()),
+                        "disaster_type": dtype,
+                        "location": location,
+                        "severity": severity,
+                    }
+
                     rd.update(data)
                     break
 
@@ -180,23 +211,27 @@ class Disaster:
         else:
             print("Cannot update non-existing record")
 
-    def delete_disaster(self, id: str) -> None:
+    def delete_disaster(self) -> None:
         register_disaster = self._read()
+        self._show()
+        print()
+        selected_id = ask_loop("Enter ID to delete: ", int)
+        print()
 
         new = []
         _id = 1
 
         if register_disaster:
             for rd in register_disaster:
-                if str(rd.get("ID")).strip() == str(id).strip():
+                if str(rd.get("ID")).strip() == str(selected_id).strip():
                     print(
                         f"{'+' * 60}"
-                        f"\n\nDELETED\n\n"
-                        f"\nID: {rd['ID']}\n"
-                        f"Date: {rd['date_registered']}\n"
-                        f"Disaster: {rd['disaster_type']}\n"
-                        f"Location: {rd['location']}\n"
-                        f"Severity: {rd['severity']}\n"
+                        f"\n  DELETED\n"
+                        f"\n  ID: {rd['ID']}\n"
+                        f"  Date: {rd['date_registered']}\n"
+                        f"  Disaster: {rd['disaster_type']}\n"
+                        f"  Location: {rd['location']}\n"
+                        f"  Severity: {rd['severity']}\n"
                         f"{'+' * 60}"
                     )
                     del rd
@@ -296,18 +331,20 @@ class Resource:
         print()
         selected_id = ask_loop("Enter which ID to update: ")
         print()
-        name = ask_loop("Enter resource name: ")
-        quant = ask_loop(f"Enter quantity of {name}")
-        resource = {"name": name, "quantity": quant}
 
         if isinstance(reg_resource, list):
             for res in reg_resource:
                 if str(res.get("ID")).strip() == str(selected_id).strip():
+                    name = ask_loop(f"Name: {res['name']} => ")
+                    quant = ask_loop(f"Quantity: {res['quantity']} => ")
+                    resource = {"name": name, "quantity": quant}
                     res.update(resource)
                     break
 
             resource_df = pd.DataFrame(reg_resource)
             resource_df.to_csv(RESOURCE, index=False)
+            self.show_resource()
+
         elif reg_resource is None:
             print("Add resource to update it.")
 
@@ -327,8 +364,8 @@ class Resource:
                 if str(rr.get("ID")).strip() == str(selected_id).strip():
                     print(
                         f"{'+' * 60}"
-                        f"\n\nDELETED\n"
-                        f"\nID: {rr['ID']}\n"
+                        f"DELETED\n"
+                        f"ID: {rr['ID']}\n"
                         f"Name: {rr['name']}\n"
                         f"Quantity: {rr['quantity']}\n"
                         f"{'+' * 60}"
@@ -430,11 +467,7 @@ def main():
         )
         selected = ask_loop("What you want to access: ", int)
         if selected == 1:
-            print(
-                "\n\n1. Register Disaster\n"
-                "\n2. Update Disaster\n"
-                "\n3. Delete Disaster\n\n"
-            )
+            print("\n1. Register Disaster\n2. Update Disaster\n3. Delete Disaster\n\n")
             sub_disaster = ask_loop("Select: ", int)
             if sub_disaster == 1:
                 disaster.register_disaster()
@@ -446,11 +479,7 @@ def main():
                 print("Wrong Selection")
 
         elif selected == 2:
-            print(
-                "\n\n1. Register Resource\n"
-                "\n2. Update Resource\n"
-                "\n3. Delete Resource\n\n"
-            )
+            print("\n1. Register Resource\n2. Update Resource\n3. Delete Resource\n")
             sub_resource = ask_loop("Selected: ", int)
             if sub_resource == 1:
                 resource.register_resource()
