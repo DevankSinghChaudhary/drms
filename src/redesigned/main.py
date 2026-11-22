@@ -1,3 +1,4 @@
+import time
 from datetime import date
 from typing import Literal
 
@@ -10,48 +11,61 @@ PASSWORD = "ADK"
 
 
 def header(title: str, sub_title: str) -> None:
-    title_width = 50 - len([char for char in title]) - 5
-    stitle_width = 50 - len([char for char in sub_title]) - 5
+    title_width = 50 - len(title) - 5
+    stitle_width = 50 - len(sub_title) - 5
 
     print("=" * 50)
     print("|", title, " " * title_width, "|")
     print("|", sub_title, " " * stitle_width, "|")
     print("=" * 50)
+    print()
+    print()
 
 
 def ask_loop(prompt: str, func=str):
     while True:
-        print("-" * 40)
-        answer = func(input(prompt))
-        print("-" * 40)
-        if answer == "":
-            print("Input cannot be empty!")
-            print()
+        try:
+            print("-" * 40)
+            answer = func(input(prompt))
+            if answer == "":
+                print("Input cannot be empty!")
+                tclean()
+                continue
+            else:
+                return answer
+                break
+        except ValueError:
+            print("\nCannot Enter String in Number Place.\nEnter Integer not String.\n")
             continue
-        else:
-            return answer
-            break
+
+
+def tclean():
+    print("\033[2J\033[H", end="")
 
 
 class Password:
     def __init__(self):
         self.TOTAL_TRIES = 5
 
-    def _ask_password(self) -> str:
-        return ask_loop("Enter Password: ")
-
-    def check(self):
+    def pass_loop(self):
         while True:
+            tclean()
+            header(title="Enter Password", sub_title="DRMS")
             print(f"Total Tries: {self.TOTAL_TRIES}")
             while True:
-                self.password = self._ask_password()
-                if self.password == "":
-                    print("Password cannot be empty!")
+                print("-" * 40)
+                answer = input("Enter Password: ")
+                if answer == "":
+                    print("Input cannot be empty!")
+                    time.sleep(0.5)
+                    tclean()
+                    header(title="Enter Password", sub_title="DRMS")
+                    print(f"Total Tries: {self.TOTAL_TRIES}")
                     continue
                 else:
                     break
-
-            if self.password == PASSWORD:
+            if answer == PASSWORD:
+                time.sleep(0.5)
                 print("Welcome to DRMS")
                 return True
             else:
@@ -59,10 +73,9 @@ class Password:
                 if self.TOTAL_TRIES == 0:
                     print("YOU ARE NOT AUTHORIZED PERSON.")
                     break
-
-                else:
-                    print("Wrong Password. Try Again.")
-                    continue
+                print("Wrong Password. Try Again.")
+                time.sleep(0.5)
+                continue
 
 
 class Disaster:
@@ -101,8 +114,6 @@ class Disaster:
             return True
 
     def _ask(self) -> dict:
-        header(title="Register Disaster", sub_title="DRMS")
-        print()
         print(
             "Disaster Types: [Flood, Tusnami, Drought, Earthquake, Cyclone, Wildfire]"
         )
@@ -149,6 +160,7 @@ class Disaster:
                     f"{'+' * 60}"
                 )
                 print()
+                time.sleep(5)
 
             else:
                 disaster["ID"] = id
@@ -166,6 +178,7 @@ class Disaster:
                     f"{'+' * 60}"
                 )
                 print()
+                time.sleep(5)
         else:
             print()
             print(
@@ -178,6 +191,7 @@ class Disaster:
                 f"{'+' * 60}",
             )
             print()
+            time.sleep(5)
 
     def update_disaster(self) -> None:
         register_disasters = self._read()
@@ -210,6 +224,7 @@ class Disaster:
 
         else:
             print("Cannot update non-existing record")
+            time.sleep(3)
 
     def delete_disaster(self) -> None:
         register_disaster = self._read()
@@ -278,20 +293,26 @@ class Resource:
     def register_resource(self):
         resources = self._read(operation="register")
 
+        self.show_resource()
+        print()
         if isinstance(resources, dict):
             res_name = resources["name"]
             res_quant = resources["quantity"]
             res_id = resources["ID"]
 
-            total_data = len(res_name)
+            total_data = len(resources["name"])
             number_resources = int(
                 input("Enter number of resources you want to append: ")
             )
+            print("-" * 50)
+            print()
 
             for id in range(number_resources):
-                self._id = self._id + total_data + id
-                name = input(f"Enter Resource name numbered {total_data + id}: ")
+                self._id = total_data + id + 1
+                name = input(f"Enter Resource name numbered {self._id}: ")
                 quant = int(input(f"Enter quantity of {name}: "))
+                print("-" * 50)
+                print()
 
                 res_name.append(name)
                 res_quant.append(quant)
@@ -312,6 +333,8 @@ class Resource:
                 self._id = self._id + 1
                 res_name = input(f"Enter Resource name numbered {id + 1}: ")
                 res_quant = int(input(f"Enter quantity of {res_name}: "))
+                print("-" * 50)
+                print()
 
                 r_name.append(res_name)
                 r_quant.append(res_quant)
@@ -323,11 +346,14 @@ class Resource:
 
         resource_df = pd.DataFrame(resources)
         resource_df.to_csv(RESOURCE, index=False)
+        self.show_resource()
+        time.sleep(5)
 
     def update_resource(self) -> None:
         reg_resource = self._read(operation="update")
 
         self.show_resource()
+        print("-" * 40)
         print()
         selected_id = ask_loop("Enter which ID to update: ")
         print()
@@ -343,10 +369,13 @@ class Resource:
 
             resource_df = pd.DataFrame(reg_resource)
             resource_df.to_csv(RESOURCE, index=False)
+            print("-" * 40)
             self.show_resource()
+            time.sleep(5)
 
         elif reg_resource is None:
-            print("Add resource to update it.")
+            print("No resource found.\nAdd resource to update it.")
+            time.sleep(3)
 
     def delete_resource(self) -> None:
         reg_resource = self._read(operation="delete")
@@ -371,10 +400,12 @@ class Resource:
                         f"{'+' * 60}"
                     )
                     del rr
+                    time.sleep(5)
                 else:
                     rr["ID"] = str(_id).strip()
                     _id += 1
                     new.append(rr)
+
             disaster_df = pd.DataFrame(new)
             disaster_df.to_csv(RESOURCE, index=False)
 
@@ -456,52 +487,97 @@ def main():
     visuals = Visuals()
     password = Password()
 
-    confirmation = password.check()
-    if confirmation:
-        print(
-            "\n\nWhat you want to do?\n\n"
-            "1. Disaster Management\n"
-            "2. Resource Management\n"
-            "3. Visualize\n"
-            "4. EXIT\n"
-        )
-        selected = ask_loop("What you want to access: ", int)
-        if selected == 1:
-            print("\n1. Register Disaster\n2. Update Disaster\n3. Delete Disaster\n\n")
-            sub_disaster = ask_loop("Select: ", int)
-            if sub_disaster == 1:
-                disaster.register_disaster()
-            elif sub_disaster == 2:
-                disaster.update_disaster()
-            elif sub_disaster == 3:
-                disaster.delete_disaster()
-            else:
-                print("Wrong Selection")
+    if password.pass_loop():
+        while True:
+            tclean()
+            header(title="Dashboard of DRMS", sub_title="DRMS")
+            print(
+                "What you want to do?\n\n"
+                "1. Disaster Management\n"
+                "2. Resource Management\n"
+                "3. Visualize\n"
+                "4. EXIT\n"
+            )
+            selected = ask_loop("What you want to access: ", int)
+            if selected == 1:
+                while True:
+                    tclean()
+                    header(title="Disaster Operations", sub_title="DRMS")
+                    print(
+                        "1. Register Disaster\n2. Update Disaster\n3. Delete Disaster\n4. BACK\n\n"
+                    )
+                    sub_disaster = ask_loop("Select: ", int)
+                    if sub_disaster == 1:
+                        tclean()
+                        header(title="Register Disaster", sub_title="DRMS")
+                        disaster.register_disaster()
+                    elif sub_disaster == 2:
+                        tclean()
+                        header(title="Update Disaster", sub_title="DRMS")
+                        disaster.update_disaster()
+                    elif sub_disaster == 3:
+                        tclean()
+                        header(title="Delete Disaster", sub_title="DRMS")
+                        disaster.delete_disaster()
+                    elif sub_disaster == 4:
+                        break
+                    else:
+                        print("Wrong Selection. Choose Again.\nChoose Between 1-4.")
+                        time.sleep(1.5)
 
-        elif selected == 2:
-            print("\n1. Register Resource\n2. Update Resource\n3. Delete Resource\n")
-            sub_resource = ask_loop("Selected: ", int)
-            if sub_resource == 1:
-                resource.register_resource()
-            elif sub_resource == 2:
-                resource.update_resource()
-            elif sub_resource == 3:
-                resource.delete_resource()
-            else:
-                print("Wrong Selection")
+            elif selected == 2:
+                while True:
+                    tclean()
+                    header(title="Resource Operations", sub_title="DRMS")
+                    print(
+                        "1. Register Resource\n2. Update Resource\n3. Delete Resource\n4. BACK\n"
+                    )
+                    sub_resource = ask_loop("Selected: ", int)
+                    if sub_resource == 1:
+                        tclean()
+                        header(title="Resource Registration", sub_title="DRMS")
+                        resource.register_resource()
+                    elif sub_resource == 2:
+                        tclean()
+                        header(title="Resource Updation", sub_title="DRMS")
+                        resource.update_resource()
+                    elif sub_resource == 3:
+                        tclean()
+                        header(title="Resource Deletion", sub_title="DRMS")
+                        resource.delete_resource()
+                    elif sub_resource == 4:
+                        break
+                    else:
+                        print("Wrong Selection. Choose Again.\nChoose Between 1-4.")
+                        time.sleep(1.5)
 
-        elif selected == 3:
-            print("\n1. Disaster\n2. Resource\n")
-            sub_visual = ask_loop("Select: ", int)
-            if sub_visual == 1:
-                visuals.disaster()
-            elif sub_visual == 2:
-                visuals.resource()
-            else:
-                print("Wrong Selection")
+            elif selected == 3:
+                while True:
+                    tclean()
+                    header(
+                        title="Visualization of Resources and Disasters",
+                        sub_title="DRMS",
+                    )
+                    print("1. Disaster\n2. Resource\n3. BACK\n")
+                    sub_visual = ask_loop("Select: ", int)
+                    if sub_visual == 1:
+                        visuals.disaster()
+                    elif sub_visual == 2:
+                        visuals.resource()
+                    elif sub_visual == 3:
+                        break
+                    else:
+                        print("Wrong Selection. Choose Again.\nChoose Between 1-3")
+                        time.sleep(1.5)
 
-        elif selected == 4:
-            exit()
+            elif selected == 4:
+                print("Exiting DRMS")
+                time.sleep(0.5)
+                exit()
+
+            else:
+                print("Wrong Selection. Choose Again.\nChoose Between 1-4")
+                time.sleep(1.5)
 
 
 if __name__ == "__main__":
